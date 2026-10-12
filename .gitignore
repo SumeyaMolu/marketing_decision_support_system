@@ -1,0 +1,21 @@
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Keep an example environment file
+!.env.example
+
+# Uploaded data and generated reports
+uploads/*
+reports/*
+
+# Local application data
+instance/
