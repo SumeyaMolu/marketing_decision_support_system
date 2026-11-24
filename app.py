@@ -1,71 +1,46 @@
-
 import os
 from urllib.parse import quote_plus
 
-from flask import Flask
-from flask_login import LoginManager
-from dotenv import load_dotenv
+from flask import Flask, render_template
+from flask_login import (
+    LoginManager,
+    login_required,
+    current_user,
+)
 
 from extensions import db
 
-
-# Load environment variables from .env
-load_dotenv()
-
-# Initialize Flask application
 app = Flask(__name__)
 
-
-# ---------------------------------------------
-# Application configuration
-# ---------------------------------------------
-
-mysql_user = os.getenv("MYSQL_USER", "root")
-mysql_password = os.getenv("MYSQL_PASSWORD", "")
-mysql_host = os.getenv("MYSQL_HOST", "localhost")
-mysql_database = os.getenv(
-    "MYSQL_DATABASE",
-    "marketing_decision_support_system"
-)
-
-secret_key = os.getenv("SECRET_KEY")
-
-if not secret_key:
-    raise RuntimeError(
-        "SECRET_KEY is missing. Add a secure SECRET_KEY to your .env file."
-    )
-
-encoded_user = quote_plus(mysql_user)
+# Database Configuration
+mysql_password = os.getenv("MYSQL_PASSWORD", "YOUR_PASSWORD")
 encoded_password = quote_plus(mysql_password)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    f"mysql+pymysql://{encoded_user}:{encoded_password}"
-    f"@{mysql_host}/{mysql_database}"
+    "mysql+pymysql://root:"
+    f"{encoded_password}@localhost/marketing_decision_support_system"
 )
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = secret_key
 
+# Flask Secret Key
+app.config["SECRET_KEY"] = os.getenv(
+    "SECRET_KEY",
+    "development-only-change-this-secret"
+)
 
-# ---------------------------------------------
-# Initialize database
-# ---------------------------------------------
-
+# Initialize Database
 db.init_app(app)
 
-
-# ---------------------------------------------
-# Initialize Flask-Login
-# ---------------------------------------------
-
+# Flask Login Configuration
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "auth.login"
 
 
-# ---------------------------------------------
-# Import database models
-# ---------------------------------------------
+# ==========================================
+# IMPORT DATABASE MODELS
+# ==========================================
 
 from models.role import Role
 from models.user import User
@@ -78,18 +53,9 @@ from models.recommendation import Recommendation
 from models.report import Report
 
 
-# ---------------------------------------------
-# Register authentication routes
-# ---------------------------------------------
-
-from routes.auth import auth_bp
-
-app.register_blueprint(auth_bp)
-
-
-# ---------------------------------------------
-# Load logged-in users
-# ---------------------------------------------
+# ==========================================
+# USER LOADER
+# ==========================================
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -99,18 +65,60 @@ def load_user(user_id):
         return None
 
 
-# ---------------------------------------------
-# Home page
-# ---------------------------------------------
+# ==========================================
+# IMPORT BLUEPRINTS
+# ==========================================
+
+from routes.auth import auth_bp
+from routes.users import users_bp
+from routes.prediction import prediction_bp
+from routes.mmm import mmm_bp
+from routes.reports import reports_bp
+from routes.marketing_data import marketing_data_bp
+
+
+# ==========================================
+# REGISTER BLUEPRINTS
+# ==========================================
+
+app.register_blueprint(auth_bp)
+app.register_blueprint(users_bp)
+app.register_blueprint(prediction_bp)
+app.register_blueprint(mmm_bp)
+app.register_blueprint(reports_bp)
+app.register_blueprint(marketing_data_bp)
+
+
+# ==========================================
+# DASHBOARD
+# ==========================================
 
 @app.route("/")
+@login_required
 def home():
-    return "Marketing Decision Support System"
+    return render_template(
+        "dashboard.html",
+        user=current_user,
+        name=current_user.full_name,
+        role=current_user.role.role_name
+        if current_user.role
+        else "Unassigned",
+    )
 
 
-# ---------------------------------------------
-# Test database connection
-# ---------------------------------------------
+# ==========================================
+# ACCESS DENIED
+# ==========================================
+
+@app.route("/access-denied")
+@login_required
+def access_denied():
+    return render_template("access_denied.html"), 403
+
+
+# ==========================================
+# DATABASE CONNECTION TEST
+# ==========================================
 
 @app.route("/test-db")
 def test_db():
@@ -120,16 +128,16 @@ def test_db():
 
     except Exception:
         app.logger.exception("Database connection test failed")
+
         return (
-            "Database connection failed. "
-            "Check your .env configuration and application logs."
-        ), 500
+            "Database connection failed. Check the application logs.",
+            500,
+        )
 
 
-# ---------------------------------------------
-# Run application
-# ---------------------------------------------
+# ==========================================
+# RUN APPLICATION
+# ==========================================
 
 if __name__ == "__main__":
     app.run(debug=True)
-

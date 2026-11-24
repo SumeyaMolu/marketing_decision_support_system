@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Marketing Decision Support System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: #fff;
+            width: 100%;
+            max-width: 440px;
+            padding: 36px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #173b70;
+            font-size: 25px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #667085;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 26px;
+        }
+
+        label {
+            display: block;
+            color: #344054;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 7px;
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: 2px solid #b9d3f8;
+            border-color: #173b70;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: #173b70;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #102b52;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 16px;
+            border-radius: 7px;
+            background: #fff0f0;
+            color: #a12626;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background: #e9f8ef;
+            color: #176b39;
+        }
+
+        .login-link {
+            margin-top: 22px;
+            text-align: center;
+            font-size: 14px;
+            color: #667085;
+        }
+
+        a {
+            color: #173b70;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 26px 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="register-container">
+        <h1>Create Account</h1>
+
+        <p class="subtitle">
+            Register to access the Marketing Decision Support System.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <label for="full_name">Full Name</label>
+            <input
+                type="text"
+                id="full_name"
+                name="full_name"
+                placeholder="Enter your full name"
+                autocomplete="name"
+                maxlength="100"
+                required
+            >
+
+            <label for="email">Email Address</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email address"
+                autocomplete="email"
+                maxlength="100"
+                required
+            >
+
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="At least 12 characters"
+                autocomplete="new-password"
+                minlength="12"
+                required
+            >
+
+            <label for="confirm_password">Confirm Password</label>
+            <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                placeholder="Enter your password again"
+                autocomplete="new-password"
+                minlength="12"
+                required
+            >
+
+            <button type="submit">Create Account</button>
+        </form>
+
+        <p class="login-link">
+            Already have an account?
+            <a href="{{ url_for('auth.login') }}">Sign in</a>
+        </p>
+    </main>
+</body>
+</html>
+

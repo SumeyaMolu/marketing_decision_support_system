@@ -1,0 +1,290 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Marketing DSS | Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        .navbar {
+            background: #1f2937;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .navbar h2 {
+            font-size: 21px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 18px;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 25px;
+        }
+
+        .welcome {
+            margin-bottom: 30px;
+        }
+
+        .welcome h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .welcome p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h3 {
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .card-link {
+            display: inline-block;
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 8px;
+            margin-right: 12px;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        .role-label {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            padding: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 18px 20px;
+            }
+
+            .container {
+                margin-top: 25px;
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+
+        <h2>Marketing Decision Support System</h2>
+
+        <div>
+            <a href="{{ url_for('home') }}">Dashboard</a>
+
+            <a href="{{ url_for('marketing_data.index') }}">
+                Marketing Data
+            </a>
+
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+
+    </div>
+
+    <div class="container">
+
+        <div class="welcome">
+
+            <h1>
+                Welcome, {{ current_user.full_name }}!
+            </h1>
+
+            <p>
+                Manage marketing activities, predict customer conversions,
+                evaluate campaign performance and access marketing insights
+                through your decision support system.
+            </p>
+
+            <span class="role-label">
+                {{ current_user.role.role_name }}
+            </span>
+
+        </div>
+
+        <div class="dashboard-grid">
+
+            <!-- Marketing Data -->
+            <div class="card">
+
+                <h3>Marketing Data</h3>
+
+                <p>
+                    Manage and explore marketing campaign data,
+                    customer information and marketing performance records.
+                </p>
+
+                <a class="card-link"
+                   href="{{ url_for('marketing_data.index') }}">
+                    Open Marketing Data Management &rarr;
+                </a>
+
+            </div>
+
+            <!-- Conversion Prediction -->
+            <div class="card">
+
+                <h3>Conversion Prediction</h3>
+
+                <p>
+                    Use the XGBoost machine learning model to estimate
+                    the likelihood of a customer making a purchase.
+                </p>
+
+                <a class="card-link"
+                   href="{{ url_for('prediction.predict_conversion') }}">
+                    Open Conversion Prediction &rarr;
+                </a>
+
+                <br>
+
+                <a class="card-link"
+                   href="{{ url_for('prediction.prediction_history') }}">
+                    View Prediction History &rarr;
+                </a>
+
+            </div>
+
+            <!-- Marketing Mix Modeling -->
+            <div class="card">
+
+                <h3>Marketing Mix Modeling</h3>
+
+                <p>
+                    Evaluate the effectiveness of different marketing
+                    channels and support advertising budget allocation.
+                </p>
+
+                <a class="card-link"
+                   href="{{ url_for('mmm.mmm_dashboard') }}">
+                    Open Marketing Mix Modeling &rarr;
+                </a>
+
+            </div>
+
+            <!-- Reports and Recommendations -->
+            <div class="card">
+
+                <h3>Reports & Recommendations</h3>
+
+                <p>
+                    Access marketing insights, model results and
+                    recommendations to support decision-making.
+                </p>
+
+                <a class="card-link"
+                   href="{{ url_for('prediction.recommendations') }}">
+                    View Recommendations &rarr;
+                </a>
+
+                <br>
+
+                <a class="card-link"
+                   href="{{ url_for('reports.reports_list') }}">
+                    View Campaign Reports &rarr;
+                </a>
+
+            </div>
+
+            <!-- User Management -->
+            {% if current_user.role and current_user.role.role_name == "Administrator" %}
+
+            <div class="card">
+
+                <h3>User Management</h3>
+
+                <p>
+                    Manage system users, assign roles and control
+                    access to the Marketing Decision Support System.
+                </p>
+
+                <a class="card-link"
+                   href="{{ url_for('users.user_list') }}">
+                    Manage Users &rarr;
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Marketing Decision Support System
+    </div>
+
+</body>
+</html>

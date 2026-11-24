@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Marketing Recommendations</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px 15px;
+            color: #263238;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            color: #176b50;
+            margin-top: 0;
+        }
+
+        .description {
+            color: #59636e;
+            margin-bottom: 25px;
+        }
+
+        .recommendation-card {
+            border: 1px solid #e0e5e9;
+            border-left: 5px solid #176b50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 18px;
+            background: #ffffff;
+        }
+
+        .recommendation-card h3 {
+            margin-top: 0;
+            color: #176b50;
+        }
+
+        .recommendation-card p {
+            line-height: 1.6;
+        }
+
+        .details {
+            color: #59636e;
+            font-size: 14px;
+        }
+
+        .action {
+            background: #eef7f2;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+        }
+
+        .empty-message {
+            background: #f4f6f9;
+            padding: 25px;
+            text-align: center;
+            border-radius: 8px;
+            color: #59636e;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #176b50;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Marketing Recommendations</h1>
+
+    <p class="description">
+        View marketing recommendations generated from customer
+        conversion predictions. Use these insights to guide
+        customer engagement and campaign decisions.
+    </p>
+
+    <h2>Generated Recommendations</h2>
+
+    {% if recommendations %}
+
+        {% for recommendation in recommendations %}
+
+            <div class="recommendation-card">
+
+                <h3>Recommendation #{{ recommendation.recommendation_id }}</h3>
+
+                <p class="details">
+                    <strong>Customer:</strong>
+                    {{ recommendation.prediction.customer.full_name
+                       if recommendation.prediction and recommendation.prediction.customer
+                       else "Unknown" }}
+                </p>
+
+                <p class="details">
+                    <strong>Campaign:</strong>
+                    {{ recommendation.campaign.campaign_name
+                       if recommendation.campaign
+                       else "Unknown" }}
+                </p>
+
+                <p class="details">
+                    <strong>Prediction:</strong>
+                    {% if recommendation.prediction %}
+                        {{ "Purchase" if recommendation.prediction.prediction_result else "No purchase" }}
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+
+                <p class="details">
+                    <strong>Purchase Probability:</strong>
+                    {% if recommendation.prediction and recommendation.prediction.predicted_conversion is not none %}
+                        {{ "%.2f"|format(recommendation.prediction.predicted_conversion * 100) }}%
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+
+                <p>
+                    <strong>Recommendation:</strong><br>
+                    {{ recommendation.recommendation_text }}
+                </p>
+
+                <div class="action">
+                    <strong>Recommended Action:</strong><br>
+                    {{ recommendation.recommended_action or "No action specified" }}
+                </div>
+
+                <p class="details">
+                    <strong>Date Generated:</strong>
+                    {{ recommendation.created_at.strftime("%d %B %Y, %H:%M")
+                       if recommendation.created_at
+                       else "Not available" }}
+                </p>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty-message">
+            <h3>No Recommendations Available</h3>
+
+            <p>
+                No marketing recommendations have been generated yet.
+                Generate a customer conversion prediction to create
+                a recommendation.
+            </p>
+        </div>
+
+    {% endif %}
+
+    <a class="back-link" href="{{ url_for('home') }}">
+        &larr; Back to Dashboard
+    </a>
+
+</div>
+
+</body>
+</html>
