@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Conversion Prediction</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px 15px;
+            color: #263238;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            color: #176b50;
+            margin-top: 0;
+        }
+
+        .description {
+            color: #59636e;
+            margin-bottom: 25px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, select {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd2d9;
+            border-radius: 6px;
+            font-size: 15px;
+            background: white;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 13px 20px;
+            background: #176b50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #10523d;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 18px;
+            border-radius: 6px;
+        }
+
+        .message.success {
+            background: #e8f5e9;
+            color: #256029;
+        }
+
+        .message.danger {
+            background: #fff0f0;
+            color: #9c2525;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #eef7f2;
+            border-left: 5px solid #176b50;
+        }
+
+        .result h2 {
+            margin-top: 0;
+        }
+
+        .recommendation {
+            margin-top: 20px;
+            padding: 18px;
+            background: #fff8e8;
+            border-left: 5px solid #d69e2e;
+            border-radius: 8px;
+        }
+
+        .recommendation h3 {
+            margin-top: 0;
+            color: #795719;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 22px;
+            color: #176b50;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Customer Conversion Prediction</h1>
+
+    <p class="description">
+        Select a customer and marketing campaign, then enter
+        website-session details to estimate the likelihood
+        of a purchase.
+    </p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+
+        <div class="form-grid">
+
+            <!-- Customer Selection -->
+            <div class="field">
+                <label for="customer_id">Select Customer</label>
+
+                <select id="customer_id" name="customer_id" required>
+                    <option value="">-- Select Customer --</option>
+
+                    {% for customer in customers %}
+                        <option value="{{ customer.customer_id }}"
+                            {% if selected_customer_id|string == customer.customer_id|string %}
+                                selected
+                            {% endif %}>
+                            {{ customer.full_name }} (ID: {{ customer.customer_id }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Campaign Selection -->
+            <div class="field">
+                <label for="campaign_id">Select Campaign</label>
+
+                <select id="campaign_id" name="campaign_id" required>
+                    <option value="">-- Select Campaign --</option>
+
+                    {% for campaign in campaigns %}
+                        <option value="{{ campaign.campaign_id }}"
+                            {% if selected_campaign_id|string == campaign.campaign_id|string %}
+                                selected
+                            {% endif %}>
+                            {{ campaign.campaign_name }} - {{ campaign.channel }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="Administrative">Administrative Pages</label>
+                <input id="Administrative" type="number"
+                       name="Administrative" min="0" step="1"
+                       value="{{ session_data.Administrative if session_data else 0 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="Administrative_Duration">
+                    Administrative Duration (seconds)
+                </label>
+                <input id="Administrative_Duration" type="number"
+                       name="Administrative_Duration" min="0" step="any"
+                       value="{{ session_data.Administrative_Duration if session_data else 0 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="Informational">Informational Pages</label>
+                <input id="Informational" type="number"
+                       name="Informational" min="0" step="1"
+                       value="{{ session_data.Informational if session_data else 0 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="Informational_Duration">
+                    Informational Duration (seconds)
+                </label>
+                <input id="Informational_Duration" type="number"
+                       name="Informational_Duration" min="0" step="any"
+                       value="{{ session_data.Informational_Duration if session_data else 0 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="ProductRelated">Product-Related Pages</label>
+                <input id="ProductRelated" type="number"
+                       name="ProductRelated" min="0" step="1"
+                       value="{{ session_data.ProductRelated if session_data else 6 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="ProductRelated_Duration">
+                    Product-Related Duration (seconds)
+                </label>
+                <input id="ProductRelated_Duration" type="number"
+                       name="ProductRelated_Duration" min="0" step="any"
+                       value="{{ session_data.ProductRelated_Duration if session_data else 24 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="BounceRates">Bounce Rate (0 to 1)</label>
+                <input id="BounceRates" type="number"
+                       name="BounceRates" min="0" max="1" step="any"
+                       value="{{ session_data.BounceRates if session_data else 0.133333 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="ExitRates">Exit Rate (0 to 1)</label>
+                <input id="ExitRates" type="number"
+                       name="ExitRates" min="0" max="1" step="any"
+                       value="{{ session_data.ExitRates if session_data else 0.166667 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="SpecialDay">Special Day Value</label>
+                <input id="SpecialDay" type="number"
+                       name="SpecialDay" min="0" max="1" step="any"
+                       value="{{ session_data.SpecialDay if session_data else 0.8 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="Month">Month</label>
+
+                <select id="Month" name="Month" required>
+                    {% for month in [
+                        "Feb", "Mar", "May", "June", "Jul",
+                        "Aug", "Sep", "Oct", "Nov", "Dec"
+                    ] %}
+                        <option value="{{ month }}"
+                            {% if session_data and session_data.Month == month %}
+                                selected
+                            {% elif not session_data and month == "May" %}
+                                selected
+                            {% endif %}>
+                            {{ month }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="OperatingSystems">Operating System Code</label>
+                <input id="OperatingSystems" type="number"
+                       name="OperatingSystems" min="1" step="1"
+                       value="{{ session_data.OperatingSystems if session_data else 2 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="Browser">Browser Code</label>
+                <input id="Browser" type="number"
+                       name="Browser" min="1" step="1"
+                       value="{{ session_data.Browser if session_data else 2 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="Region">Region Code</label>
+                <input id="Region" type="number"
+                       name="Region" min="1" step="1"
+                       value="{{ session_data.Region if session_data else 7 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="TrafficType">Traffic Type Code</label>
+                <input id="TrafficType" type="number"
+                       name="TrafficType" min="1" step="1"
+                       value="{{ session_data.TrafficType if session_data else 3 }}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="VisitorType">Visitor Type</label>
+
+                <select id="VisitorType" name="VisitorType" required>
+                    <option value="Returning_Visitor"
+                        {% if not session_data or session_data.VisitorType == "Returning_Visitor" %}
+                            selected
+                        {% endif %}>
+                        Returning Visitor
+                    </option>
+
+                    <option value="New_Visitor"
+                        {% if session_data and session_data.VisitorType == "New_Visitor" %}
+                            selected
+                        {% endif %}>
+                        New Visitor
+                    </option>
+
+                    <option value="Other"
+                        {% if session_data and session_data.VisitorType == "Other" %}
+                            selected
+                        {% endif %}>
+                        Other
+                    </option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="Weekend">Weekend</label>
+
+                <select id="Weekend" name="Weekend" required>
+                    <option value="False"
+                        {% if not session_data or not session_data.Weekend %}
+                            selected
+                        {% endif %}>
+                        No
+                    </option>
+
+                    <option value="True"
+                        {% if session_data and session_data.Weekend %}
+                            selected
+                        {% endif %}>
+                        Yes
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+        <button type="submit">
+            Predict Purchase Likelihood
+        </button>
+
+    </form>
+
+    {% if prediction is defined %}
+
+        <div class="result">
+
+            <h2>Prediction Result</h2>
+
+            <p>
+                <strong>Predicted purchase probability:</strong>
+                {{ probability }}%
+            </p>
+
+            <p>
+                <strong>Classification:</strong>
+                {{ prediction }}
+            </p>
+
+            <p>
+                <strong>Classification threshold:</strong>
+                {{ threshold }}%
+            </p>
+
+            <p>
+                This result is a model estimate, not a guarantee
+                of the customer's behaviour.
+            </p>
+
+            {% if recommendation %}
+                <div class="recommendation">
+                    <h3>Marketing Recommendation</h3>
+
+                    <p>{{ recommendation }}</p>
+
+                    <p>
+                        <strong>Recommended Action:</strong>
+                        {{ recommended_action }}
+                    </p>
+                </div>
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+    <a class="back-link" href="{{ url_for('home') }}">
+        Back to Dashboard
+    </a>
+
+</div>
+
+</body>
+</html>

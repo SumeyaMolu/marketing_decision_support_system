@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Mix Modeling</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #263238;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            color: #183b56;
+        }
+
+        .subtitle {
+            color: #667085;
+        }
+
+        .back-link {
+            text-decoration: none;
+            background: #183b56;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+            margin: 25px 0;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .metric-card h3 {
+            color: #667085;
+            font-size: 15px;
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .metric-card p {
+            font-size: 25px;
+            font-weight: bold;
+            color: #183b56;
+            margin-bottom: 12px;
+        }
+
+        .metric-description {
+            color: #667085;
+            font-size: 13px;
+            line-height: 1.6;
+            font-weight: normal;
+            margin: 0;
+        }
+
+        .section {
+            background: white;
+            padding: 22px;
+            margin-top: 22px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow-x: auto;
+        }
+
+        .section h2 {
+            color: #183b56;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f0f4f8;
+            color: #183b56;
+        }
+
+        .note {
+            color: #667085;
+            font-size: 13px;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+
+    <div class="header">
+        <div>
+            <h1>Marketing Mix Modeling</h1>
+
+            <p class="subtitle">
+                Understand marketing channel performance and how well the model predicts results.
+            </p>
+        </div>
+
+        <a href="{{ url_for('home') }}" class="back-link">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- MODEL PERFORMANCE METRICS -->
+
+    <div class="metrics">
+
+        <div class="metric-card">
+            <h3>Average Prediction Error</h3>
+
+            <p>{{ "{:,.2f}".format(mae) }}</p>
+
+            <div class="metric-description">
+                On average, the model's predictions differ from the actual
+                results by this amount. Lower values indicate predictions
+                closer to the actual results.
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <h3>Large Prediction Errors</h3>
+
+            <p>{{ "{:,.2f}".format(rmse) }}</p>
+
+            <div class="metric-description">
+                This measure gives greater importance to larger prediction
+                errors. A lower value generally indicates that the model
+                makes fewer large mistakes.
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <h3>Variation Explained by the Model</h3>
+
+            <p>
+                {% if test_r_squared is not none and test_r_squared == test_r_squared %}
+                    {{ "%.1f"|format(test_r_squared * 100) }}%
+                {% else %}
+                    N/A
+                {% endif %}
+            </p>
+
+            <div class="metric-description">
+                This indicates how much of the variation in the actual
+                results is explained by the model. A higher percentage
+                indicates that the model explains more of the variation.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DATA OVERVIEW -->
+
+    <div class="section">
+        <h2>Model Data Overview</h2>
+
+        <p><strong>Total observations:</strong> {{ total_weeks }}</p>
+
+        <p><strong>Training observations:</strong> {{ training_weeks }}</p>
+
+        <p><strong>Testing observations:</strong> {{ testing_weeks }}</p>
+    </div>
+
+    <!-- MARKETING CHANNEL PERFORMANCE -->
+
+    <div class="section">
+        <h2>Marketing Channel Performance</h2>
+
+        {% if channel_performance %}
+
+        <table>
+            <thead>
+                <tr>
+                    {% for column in channel_performance[0].keys() %}
+                    <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in channel_performance %}
+                <tr>
+                    {% for value in row.values() %}
+                    <td>
+                        {% if value is number %}
+                            {{ "{:,.2f}".format(value) }}
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+
+            <p>No channel performance results available.</p>
+
+        {% endif %}
+
+        <p class="note">
+            Channel contributions and return-on-investment estimates are
+            model-based estimates. They should not be interpreted as proven
+            causal effects or actual financial returns.
+        </p>
+    </div>
+
+    <!-- RELATIONSHIP BETWEEN MARKETING VARIABLES -->
+
+    <div class="section">
+        <h2>Relationship Between Marketing Variables</h2>
+
+        <p class="note">
+            This analysis measures how much marketing variables overlap
+            with one another. Higher scores indicate greater overlap,
+            which may make it harder for the model to distinguish the
+            individual influence of each variable. Scores below 5
+            generally indicate that there is no severe overlap based
+            on a commonly used guideline.
+        </p>
+
+        {% if vif_results %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Marketing Variable</th>
+                    <th>Variable Overlap Score</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in vif_results %}
+
+                <tr>
+                    <td>
+                        {% set variable = row.get('Variable', row.get('variable', row.get('Feature', row.get('feature', 'Unknown')))) %}
+
+                        {% if variable == 'Channel3_impression_adstock_saturation' %}
+                            Advertising Channel 3 – Adjusted Advertising Impact
+
+                        {% elif variable == 'Channel2_impression_adstock_saturation' %}
+                            Advertising Channel 2 – Adjusted Advertising Impact
+
+                        {% elif variable == 'Channel4_impression_adstock_saturation' %}
+                            Advertising Channel 4 – Adjusted Advertising Impact
+
+                        {% elif variable == 'sentiment_score_control' %}
+                            Customer Sentiment
+
+                        {% elif variable == 'competitor_sales_control' %}
+                            Competitor Sales
+
+                        {% elif variable == 'Channel1_impression_adstock_saturation' %}
+                            Advertising Channel 1 – Adjusted Advertising Impact
+
+                        {% elif variable == 'Organic_channel0_impression' %}
+                            Organic Marketing Channel 0
+
+                        {% elif variable == 'Channel0_impression_adstock_saturation' %}
+                            Advertising Channel 0 – Adjusted Advertising Impact
+
+                        {% elif variable == 'Promo' %}
+                            Promotions
+
+                        {% elif variable == 'time_trend' %}
+                            Time Trend
+
+                        {% else %}
+                            {{ variable }}
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% for key, value in row.items() %}
+                            {% if key|lower == 'vif' %}
+                                {{ "%.3f"|format(value) }}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+
+            <p>No results available for this analysis.</p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+</body>
+</html>

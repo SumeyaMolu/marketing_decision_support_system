@@ -1,0 +1,359 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | Marketing DSS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f2f5fb;
+            color: #26364d;
+        }
+
+        header {
+            background: #193e73;
+            color: white;
+            padding: 22px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .logout-button,
+        .submit-button,
+        .back-button {
+            display: inline-block;
+            padding: 11px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .logout-button {
+            background: white;
+            color: #193e73;
+        }
+
+        .back-button,
+        .submit-button {
+            background: #193e73;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 35px auto;
+            padding: 0 22px;
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .page-heading h2 {
+            color: #193e73;
+            margin: 0;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e6ef;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px #1b365008;
+        }
+
+        .panel h3 {
+            margin-top: 0;
+            color: #193e73;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: 2px solid #8eb6ed;
+            border-color: #193e73;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .help-text {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 13px 16px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+
+        .message.success {
+            background: #e6f4ea;
+            color: #176534;
+        }
+
+        .message.error {
+            background: #fdecec;
+            color: #a32020;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th,
+        td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #e8eef8;
+            color: #193e73;
+        }
+
+        tbody tr:hover {
+            background: #f8faff;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #64748b;
+            padding: 25px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #68768a;
+            font-size: 13px;
+        }
+
+        @media (max-width: 650px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Marketing DSS — User Management</h1>
+
+    <form action="{{ url_for('auth.logout') }}" method="POST">
+        <button class="logout-button" type="submit">Log Out</button>
+    </form>
+</header>
+
+<main class="container">
+
+    <div class="page-heading">
+        <h2>Manage Registered Users</h2>
+
+        <a class="back-button" href="{{ url_for('home') }}">
+            Back to Dashboard
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="messages">
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <section class="panel">
+        <h3>Create New User</h3>
+        <p>Create an account and assign the appropriate system role.</p>
+
+        <form action="{{ url_for('users.user_list') }}" method="POST">
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input
+                        type="text"
+                        id="full_name"
+                        name="full_name"
+                        maxlength="100"
+                        autocomplete="name"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        maxlength="100"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Temporary Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        minlength="12"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <span class="help-text">
+                        Use at least 12 characters.
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="role_id">Assign Role</label>
+                    <select id="role_id" name="role_id" required>
+                        <option value="">Select a role</option>
+
+                        {% for role in roles %}
+                            <option value="{{ role.role_id }}">
+                                {{ role.role_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="full-width">
+                    <button class="submit-button" type="submit">
+                        Create User Account
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h3>Registered Users</h3>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Full Name</th>
+                        <th>Email Address</th>
+                        <th>Role</th>
+                        <th>Date Registered</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.user_id }}</td>
+                            <td>{{ user.full_name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {{ user.role.role_name if user.role else "Unassigned" }}
+                            </td>
+                            <td>
+                                {{ user.created_at.strftime('%d %b %Y, %H:%M') if user.created_at else "N/A" }}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="empty-message">
+                                No registered users found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    Marketing Decision Support System &copy; 2026
+</footer>
+
+</body>
+</html>
+```

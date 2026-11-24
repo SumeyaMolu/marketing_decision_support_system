@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Generate Campaign Report | Marketing DSS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 22px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-left: 15px;
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .flash {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .empty-message {
+            color: #b91c1c;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Generate Campaign Report</h1>
+
+        <p class="description">
+            Select a marketing campaign and provide a report title.
+            The system will generate a report using the campaign's
+            customer, prediction and recommendation data.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% if campaigns %}
+
+        <form method="POST">
+
+            <label for="report_title">Report Title</label>
+
+            <input
+                type="text"
+                id="report_title"
+                name="report_title"
+                placeholder="e.g. Campaign Performance Report"
+                maxlength="150"
+                required
+            >
+
+            <label for="campaign_id">Select Campaign</label>
+
+            <select
+                id="campaign_id"
+                name="campaign_id"
+                required
+            >
+                <option value="">-- Select a campaign --</option>
+
+                {% for campaign in campaigns %}
+                    <option value="{{ campaign.campaign_id }}">
+                        {{ campaign.campaign_name }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+            <button type="submit">
+                Generate Report
+            </button>
+
+            <a class="back-link"
+               href="{{ url_for('reports.reports_list') }}">
+                Cancel
+            </a>
+
+        </form>
+
+        {% else %}
+
+            <p class="empty-message">
+                No campaigns are available. Please add a campaign before
+                generating a report.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

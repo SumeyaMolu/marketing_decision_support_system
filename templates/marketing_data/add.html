@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Marketing Data</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #1f2937;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .back {
+            background: #6b7280;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Add Marketing Data</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+
+        <div class="form-group">
+            <label>Campaign *</label>
+            <select name="campaign_id" required>
+                <option value="">Select Campaign</option>
+                {% for campaign in campaigns %}
+                    <option value="{{ campaign.campaign_id }}">
+                        {{ campaign.campaign_id }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Customer (Optional)</label>
+            <select name="customer_id">
+                <option value="">No Customer</option>
+                {% for customer in customers %}
+                    <option value="{{ customer.customer_id }}">
+                        {{ customer.customer_id }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Channel *</label>
+            <select name="channel" required>
+                <option value="">Select Channel</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Email">Email</option>
+                <option value="Search Engine">Search Engine</option>
+                <option value="Website">Website</option>
+                <option value="Display Advertising">Display Advertising</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Ad Spend</label>
+            <input type="number" name="ad_spend" step="0.01" min="0">
+        </div>
+
+        <div class="form-group">
+            <label>Impressions</label>
+            <input type="number" name="impressions" min="0">
+        </div>
+
+        <div class="form-group">
+            <label>Clicks</label>
+            <input type="number" name="clicks" min="0">
+        </div>
+
+        <div class="form-group">
+            <label>Website Traffic</label>
+            <input type="number" name="website_traffic" min="0">
+        </div>
+
+        <div class="form-group">
+            <label>Click-Through Rate (CTR)</label>
+            <input type="number" name="ctr" step="0.0001" min="0">
+        </div>
+
+        <div class="form-group">
+            <label>Time on Site</label>
+            <input type="number" name="time_on_site" step="0.01" min="0">
+        </div>
+
+        <div class="form-group">
+            <label>Conversion</label>
+            <select name="conversion">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+        </div>
+
+        <div class="buttons">
+            <button type="submit">Save Marketing Data</button>
+
+            <a href="{{ url_for('marketing_data.index') }}" class="back">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>
